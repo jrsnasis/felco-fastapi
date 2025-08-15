@@ -1,0 +1,13 @@
+# requirements.txt - Python 3.13 Compatible
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+sqlalchemy==2.0.36
+pymysql==1.1.1
+pydantic==2.10.2
+pydantic-settings>=2.1.0
+python-multipart==0.0.12
+python-dotenv==1.0.1
+alembic==1.14.0
+
+# Additional dependencies for Windows compatibility
+cryptography>=42.0.0

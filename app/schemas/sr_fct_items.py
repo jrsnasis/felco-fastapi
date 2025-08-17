@@ -1,8 +1,9 @@
 # app/schemas/sr_fct_items.py
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, List, DECIMAL
+from typing import Optional, List
 from datetime import datetime
-from typing import TYPE_CHECKING
+# from typing import TYPE_CHECKING
+from decimal import Decimal as DECIMAL
 
 
 class BaseSchema(BaseModel):
@@ -38,47 +39,45 @@ class SrFctItemsBase(BaseSchema):
 
 class SrFctItemsCreate(SrFctItemsBase):
     """Schema for creating new SR item records"""
-
     pass
 
 
-class SrFctItems(SrFctItemsBase):
+class SrFctItemsUpdate(BaseSchema):
+    """Schema for updating SR item records"""
+    appkey: Optional[str] = None
+    keyid: Optional[str] = None
+    matnr: Optional[str] = None
+    fk_actiontype: Optional[int] = None
+    discount: Optional[DECIMAL] = None
+    qty: Optional[int] = None
+    srp: Optional[DECIMAL] = None
+    total_amount: Optional[DECIMAL] = None
+    net_price: Optional[DECIMAL] = None
+    net_total_amount: Optional[DECIMAL] = None
+    fsp_remarks: Optional[str] = None
+    ssa_remarks: Optional[str] = None
+    dr_number: Optional[str] = None
+    dr_date: Optional[datetime] = None
+    code: Optional[str] = None
+    nsmemail: Optional[str] = None
+    gsmemail: Optional[str] = None
+    rsmemail: Optional[str] = None
+    fspemail: Optional[str] = None
+    is_sdo: Optional[int] = None
+
+
+class SrFctItemsResponse(SrFctItemsBase):
     """Base schema for SR item responses"""
-
     id: int
-
-
-if TYPE_CHECKING:
-    from .dimensions import DimMara, DimCustomDropdown
-    from .sr_fct_header import SrFctHeader
-    from .sr_fct_logsremarksitems import SrFctLogsRemarksItems
-
-
-class SrFctItemsComplete(SrFctItems):
-    """Complete schema including all relationships"""
-
-    header: Optional["SrFctHeader"] = None
-    material: Optional["DimMara"] = None
-    action_type: Optional["DimCustomDropdown"] = None
-    item_logs: List["SrFctLogsRemarksItems"] = []
-
-
-class SrFctItemsResponse(SrFctItems):
-    """Standard response schema for SR items"""
-
-    pass
-
-
-class SrFctItemsDetailResponse(SrFctItemsComplete):
-    """Detailed response schema with relationships"""
-
-    pass
+    created_at: datetime
+    updated_at: datetime
+    m_created_at: datetime
+    m_updated_at: datetime
 
 
 class SrFctItemsListResponse(BaseSchema):
     """Paginated list response for SR items"""
-
-    items: List[SrFctItems]
+    items: List[SrFctItemsResponse]
     total: int
     skip: int
     limit: int

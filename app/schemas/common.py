@@ -109,19 +109,6 @@ class BulkDeleteResult(BaseSchema):
     errors: List[str] = []
 
 
-class EmailValidationMixin(BaseSchema):
-    """Mixin for email field validation"""
-
-    @field_validator("fspemail", "rsmemail", "gsmemail", "nsmemail", mode="before")
-    @classmethod
-    def validate_email(cls, v):
-        if v and v.strip():
-            # Basic email validation
-            if "@" not in v:
-                raise ValueError("Invalid email format")
-        return v
-
-
 class DECIMALValidationMixin(BaseSchema):
     """Mixin for DECIMAL field validation"""
 

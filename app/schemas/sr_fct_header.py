@@ -1,9 +1,10 @@
 # app/schemas/sr_fct_header.py
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, List, DECIMAL
+from typing import Optional, List
 from datetime import datetime
 from typing import TYPE_CHECKING
 from pydantic import field_validator
+from decimal import Decimal as DECIMAL
 
 
 class BaseSchema(BaseModel):

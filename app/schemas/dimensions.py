@@ -3,9 +3,10 @@ Pydantic schemas for dimension tables
 """
 
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, List, DECIMAL
+from typing import Optional, List
 from datetime import datetime, date
 from typing import TYPE_CHECKING
+from decimal import Decimal as DECIMAL
 
 
 class BaseSchema(BaseModel):

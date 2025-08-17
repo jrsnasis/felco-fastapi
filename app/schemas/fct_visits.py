@@ -1,8 +1,9 @@
 # app/schemas/fct_visits.py
 from pydantic import BaseModel, ConfigDict
-from typing import Optional, DECIMAL
+from typing import Optional
 from datetime import datetime, date, time
 from typing import TYPE_CHECKING
+from decimal import Decimal as DECIMAL
 
 
 class BaseSchema(BaseModel):

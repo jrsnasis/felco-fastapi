@@ -1,10 +1,16 @@
 # app/models/sr_fct_header.py
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, DECIMAL
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String, DateTime, DECIMAL
+from sqlalchemy.orm import relationship, foreign
 from datetime import datetime
+from app.models.base import Base
 
-Base = declarative_base()
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .dimensions import DimCustomDropdown, DimCustomer
+    from .sr_fct_items import SrFctItems
+    from .sr_fct_attachment import SrFctAttachment
+    from .sr_fct_logsremarksheader import SrFctLogsRemarksHeader
 
 
 class SrFctHeader(Base):
@@ -13,10 +19,10 @@ class SrFctHeader(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     appkey = Column(String(255), nullable=False, unique=True)
     keyid = Column(String(255))
-    fk_typerequest = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
-    fk_reasonreturn = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
-    fk_modereturn = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
-    fk_status = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
+    fk_typerequest = Column(Integer)  # Removed ForeignKey
+    fk_reasonreturn = Column(Integer)  # Removed ForeignKey
+    fk_modereturn = Column(Integer)  # Removed ForeignKey
+    fk_status = Column(Integer)  # Removed ForeignKey
     kunnr = Column(String(10))
     updated_shiptocode = Column(String(10))
     ship_name = Column(String(225))
@@ -53,34 +59,52 @@ class SrFctHeader(Base):
     created_by = Column(String(225))
     processed_by = Column(String(225))
 
-    # Relationships
+    # Relationships (view-only foreign keys)
     type_request = relationship(
         "DimCustomDropdown",
-        foreign_keys=[fk_typerequest],
         back_populates="sr_headers_type_request",
+        primaryjoin="foreign(SrFctHeader.fk_typerequest) == DimCustomDropdown.id",
+        viewonly=True,
     )
     reason_return = relationship(
         "DimCustomDropdown",
-        foreign_keys=[fk_reasonreturn],
         back_populates="sr_headers_reason_return",
+        primaryjoin="foreign(SrFctHeader.fk_reasonreturn) == DimCustomDropdown.id",
+        viewonly=True,
     )
     mode_return = relationship(
         "DimCustomDropdown",
-        foreign_keys=[fk_modereturn],
         back_populates="sr_headers_mode_return",
+        primaryjoin="foreign(SrFctHeader.fk_modereturn) == DimCustomDropdown.id",
+        viewonly=True,
     )
     status = relationship(
         "DimCustomDropdown",
-        foreign_keys=[fk_status],
         back_populates="sr_headers_status",
+        primaryjoin="foreign(SrFctHeader.fk_status) == DimCustomDropdown.id",
+        viewonly=True,
     )
-
     customer = relationship(
         "DimCustomer",
-        primaryjoin="and_(SrFctHeader.kunnr == DimCustomer.kunnr, SrFctHeader.code == DimCustomer.fspcode)",
-        back_populates="sr_headers",
+        back_populates="headers",
+        primaryjoin="and_(foreign(SrFctHeader.kunnr) == DimCustomer.kunnr, foreign(SrFctHeader.code) == DimCustomer.fspcode)",
+        viewonly=True,
     )
-
-    items = relationship("SrFctItems", back_populates="header")
-    header_logs = relationship("SrFctLogsRemarksHeader", back_populates="header")
-    attachments = relationship("SrFctAttachment", back_populates="header")
+    items = relationship(
+        "SrFctItems",
+        back_populates="header",
+        primaryjoin="SrFctHeader.appkey == foreign(SrFctItems.appkey)",
+        viewonly=True,
+    )
+    header_logs = relationship(
+        "SrFctLogsRemarksHeader",
+        back_populates="header",
+        primaryjoin="SrFctHeader.appkey == foreign(SrFctLogsRemarksHeader.appkey)",
+        viewonly=True,
+    )
+    attachments = relationship(
+        "SrFctAttachment",
+        back_populates="header",
+        primaryjoin="SrFctHeader.appkey == foreign(SrFctAttachment.appkey)",
+        viewonly=True,
+    )

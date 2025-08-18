@@ -32,12 +32,10 @@ from .fct_visits import (
 )
 
 from .sr_fct_header import (
-    SrFctHeader,
     SrFctHeaderCreate,
-    SrFctHeaderComplete,
     SrFctHeaderResponse,
-    SrFctHeaderDetailResponse,
     SrFctHeaderListResponse,
+    SrFctHeaderUpdate,
 )
 
 from .sr_fct_items import (
@@ -123,6 +121,7 @@ __all__ = [
     "SrFctHeaderResponse",
     "SrFctHeaderDetailResponse",
     "SrFctHeaderListResponse",
+    "SrFctHeaderUpdate",
     "SrFctItems",
     "SrFctItemsCreate",
     "SrFctItemsComplete",
@@ -193,14 +192,13 @@ SR_SCHEMAS = [
 ]
 
 for _model in [
-    SrFctHeaderDetailResponse,
-    SrFctAttachmentDetailResponse,
-    SrFctLogsRemarksHeaderDetailResponse,
-    SrFctLogsRemarksItemsDetailResponse,
-    FctVisitsResponse,
-    FctVisitsListResponse,
+    SrFctAttachment,
+    SrFctLogsRemarksHeader,
+    SrFctLogsRemarksItems,
+    DimCustomDropdown,
+    DimCustomer,
 ]:
     try:
         _model.model_rebuild()
-    except Exception:
-        pass  # Some might not need it
+    except Exception as e:
+        print(f"Skipping rebuild for {_model}: {e}")

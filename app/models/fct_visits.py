@@ -1,11 +1,22 @@
 # app/models/fct_visits.py
-from sqlalchemy import Column, Integer, String, DateTime, Date, Text, Time, DECIMAL
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+    Date,
+    Text,
+    Time,
+    DECIMAL,
+)
+from sqlalchemy.orm import relationship, foreign
 from datetime import datetime
+from app.models.base import Base
 
+from typing import TYPE_CHECKING
 
-Base = declarative_base()
+if TYPE_CHECKING:
+    from .dimensions import DimCustomer
 
 
 class FctVisits(Base):
@@ -17,9 +28,9 @@ class FctVisits(Base):
     gsmemail = Column(String(50))
     rsmemail = Column(String(50))
     fspemail = Column(String(50))
-    code = Column(String(4))
+    code = Column(String(10))  # Removed ForeignKey
     vdate = Column(Date, nullable=False)
-    kunnr = Column(String(10))
+    kunnr = Column(String(10))  # Removed ForeignKey
     name = Column(String(150))
     address = Column(String(150))
     map = Column(String(150))
@@ -135,9 +146,10 @@ class FctVisits(Base):
     unified_integration_retry_at = Column(DateTime)
     latlong_timeout = Column(String(50))
 
-    # Relationships
+    # Relationships (view-only foreign keys)
     customer = relationship(
         "DimCustomer",
-        primaryjoin="and_(FctVisits.kunnr == DimCustomer.kunnr, FctVisits.code == DimCustomer.fspcode)",
         back_populates="visits",
+        primaryjoin="and_(foreign(FctVisits.kunnr) == DimCustomer.kunnr, foreign(FctVisits.code) == DimCustomer.fspcode)",
+        viewonly=True,
     )

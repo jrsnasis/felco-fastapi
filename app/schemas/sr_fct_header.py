@@ -1,17 +1,13 @@
 # app/schemas/sr_fct_header.py
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from typing import Optional, List
 from datetime import datetime
-from typing import TYPE_CHECKING
-from pydantic import field_validator
-from decimal import Decimal as DECIMAL
+from decimal import Decimal
 
 
-class BaseSchema(BaseModel):
+class SrFctHeaderBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-
-class SrFctHeaderBase(BaseSchema):
     appkey: str
     keyid: Optional[str] = None
     fk_typerequest: Optional[int] = None
@@ -25,22 +21,18 @@ class SrFctHeaderBase(BaseSchema):
     sdo_pao_remarks: Optional[str] = None
     ssa_remarks: Optional[str] = None
     approver_remarks: Optional[str] = None
-    return_total: Optional[DECIMAL] = None
-    replacement_total: Optional[DECIMAL] = None
+    return_total: Optional[Decimal] = None
+    replacement_total: Optional[Decimal] = None
     nsmemail: Optional[str] = None
     gsmemail: Optional[str] = None
     rsmemail: Optional[str] = None
     fspemail: Optional[str] = None
     code: Optional[str] = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-    m_created_at: Optional[datetime] = None
-    m_updated_at: Optional[datetime] = None
     date_submitted_ssa: Optional[datetime] = None
     date_sent_approval: Optional[datetime] = None
     fsp: Optional[str] = None
     rsm: Optional[str] = None
-    total_amount: Optional[DECIMAL] = None
+    total_amount: Optional[Decimal] = None
     atpo_number: Optional[int] = None
     wrr_number: Optional[int] = None
     creation_tat: Optional[str] = None
@@ -57,56 +49,46 @@ class SrFctHeaderBase(BaseSchema):
 
 class SrFctHeaderCreate(SrFctHeaderBase):
     @field_validator("appkey")
+    @classmethod
     def validate_appkey(cls, v):
-        if not v:
+        if not v or not v.strip():
             raise ValueError("appkey cannot be empty")
-        return v
-
-    pass
+        return v.strip()
 
 
-class SrFctHeader(SrFctHeaderBase):
-    """Base schema for SR header responses"""
+class SrFctHeaderUpdate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
+    # Only include fields that can be updated
+    keyid: Optional[str] = None
+    fk_typerequest: Optional[int] = None
+    fk_reasonreturn: Optional[int] = None
+    fk_modereturn: Optional[int] = None
+    fk_status: Optional[int] = None
+    kunnr: Optional[str] = None
+    updated_shiptocode: Optional[str] = None
+    ship_name: Optional[str] = None
+    ship_to: Optional[str] = None
+    sdo_pao_remarks: Optional[str] = None
+    ssa_remarks: Optional[str] = None
+    approver_remarks: Optional[str] = None
+    return_total: Optional[Decimal] = None
+    replacement_total: Optional[Decimal] = None
+    total_amount: Optional[Decimal] = None
+    date_approval: Optional[datetime] = None
+    approver: Optional[str] = None
+    remarks_return: Optional[str] = None
+    processed_by: Optional[str] = None
+
+
+class SrFctHeaderResponse(SrFctHeaderBase):
     id: int
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
-if TYPE_CHECKING:
-    from .dimensions import DimCustomDropdown, DimCustomer
-    from .sr_fct_items import SrFctItems
-    from .sr_fct_attachment import SrFctAttachment
-    from .sr_fct_logsremarksheader import SrFctLogsRemarksHeader
-
-
-class SrFctHeaderComplete(SrFctHeader):
-    """Complete schema including all relationships"""
-
-    type_request: Optional["DimCustomDropdown"] = None
-    reason_return: Optional["DimCustomDropdown"] = None
-    mode_return: Optional["DimCustomDropdown"] = None
-    status: Optional["DimCustomDropdown"] = None
-    customer: Optional["DimCustomer"] = None
-    items: List["SrFctItems"] = []
-    header_logs: List["SrFctLogsRemarksHeader"] = []
-    attachments: List["SrFctAttachment"] = []
-
-
-class SrFctHeaderResponse(SrFctHeader):
-    """Standard response schema for SR headers"""
-
-    pass
-
-
-class SrFctHeaderDetailResponse(SrFctHeaderComplete):
-    """Detailed response schema with relationships"""
-
-    pass
-
-
-class SrFctHeaderListResponse(BaseSchema):
-    """Paginated list response for SR headers"""
-
-    items: List[SrFctHeader]
+class SrFctHeaderListResponse(BaseModel):
+    items: List[SrFctHeaderResponse]
     total: int
     skip: int
     limit: int

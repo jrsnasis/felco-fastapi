@@ -1,4 +1,4 @@
-# app/deps.py
+# app/api/deps.py
 from sqlalchemy.orm import Session
 from typing import Generator
 

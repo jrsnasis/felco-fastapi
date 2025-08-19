@@ -1,6 +1,5 @@
-# app/models/sr_fct_logsremarksheader.py
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship, foreign
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
 
@@ -15,9 +14,9 @@ class SrFctLogsRemarksHeader(Base):
     __tablename__ = "sr_fct_logsremarksheader"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    appkey = Column(String(50), nullable=False)  # Removed ForeignKey
+    appkey = Column(String(50), ForeignKey("sr_fct_header.appkey"), nullable=False)
     keyid = Column(String(50))
-    fk_typeapprovalstatus = Column(Integer)  # Removed ForeignKey
+    fk_typeapprovalstatus = Column(Integer, ForeignKey("sr_dim_typeofapprovalstat.id"))
     remarks = Column(String(255))
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(
@@ -30,16 +29,8 @@ class SrFctLogsRemarksHeader(Base):
     type_remarks = Column(String(255))
     created_by = Column(String(225))
 
-    # Relationships (view-only foreign keys)
-    header = relationship(
-        "SrFctHeader",
-        back_populates="header_logs",
-        primaryjoin="foreign(SrFctLogsRemarksHeader.appkey) == SrFctHeader.appkey",
-        viewonly=True,
-    )
+    # Relationships
+    header = relationship("SrFctHeader", back_populates="header_logs")
     approval_status = relationship(
-        "SrDimTypeOfApprovalStat",
-        back_populates="header_logs",
-        primaryjoin="foreign(SrFctLogsRemarksHeader.fk_typeapprovalstatus) == SrDimTypeOfApprovalStat.id",
-        viewonly=True,
+        "SrDimTypeOfApprovalStat", back_populates="header_logs"
     )

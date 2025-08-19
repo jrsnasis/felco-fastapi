@@ -1,4 +1,3 @@
-# app/models/fct_visits.py
 from sqlalchemy import (
     Column,
     Integer,
@@ -8,15 +7,17 @@ from sqlalchemy import (
     Text,
     Time,
     DECIMAL,
+    ForeignKey,
+    ForeignKeyConstraint,
 )
-from sqlalchemy.orm import relationship, foreign
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .dimensions import DimCustomer
+    from .dimensions import DimCustomer, DimCustomDropdown
 
 
 class FctVisits(Base):
@@ -28,9 +29,17 @@ class FctVisits(Base):
     gsmemail = Column(String(50))
     rsmemail = Column(String(50))
     fspemail = Column(String(50))
-    code = Column(String(10))  # Removed ForeignKey
+    code = Column(String(10), nullable=False)
+    kunnr = Column(String(10), nullable=False)
+
+    # FK → DimCustomer
+    __table_args__ = (
+        ForeignKeyConstraint(
+            [kunnr, code], ["dim_customer.kunnr", "dim_customer.fspcode"]
+        ),
+    )
+
     vdate = Column(Date, nullable=False)
-    kunnr = Column(String(10))  # Removed ForeignKey
     name = Column(String(150))
     address = Column(String(150))
     map = Column(String(150))
@@ -81,8 +90,11 @@ class FctVisits(Base):
     so_xml_doc_id = Column(Integer)
     so_error_id = Column(Integer)
     order_type = Column(String(10), default="ZOR")
-    booking_status_id = Column(Integer)
-    booking_status_id2 = Column(Integer)
+
+    # FKs → DimCustomDropdown
+    booking_status_id = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
+    booking_status_id2 = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
+
     manual_setup_at = Column(DateTime)
     integration_status = Column(Integer, default=0)
     integration_status_created_at = Column(DateTime)
@@ -146,10 +158,13 @@ class FctVisits(Base):
     unified_integration_retry_at = Column(DateTime)
     latlong_timeout = Column(String(50))
 
-    # Relationships (view-only foreign keys)
+    # Relationships
     customer = relationship(
         "DimCustomer",
         back_populates="visits",
-        primaryjoin="and_(foreign(FctVisits.kunnr) == DimCustomer.kunnr, foreign(FctVisits.code) == DimCustomer.fspcode)",
-        viewonly=True,
+    )
+
+    booking_status = relationship("DimCustomDropdown", foreign_keys=[booking_status_id])
+    booking_status2 = relationship(
+        "DimCustomDropdown", foreign_keys=[booking_status_id2]
     )

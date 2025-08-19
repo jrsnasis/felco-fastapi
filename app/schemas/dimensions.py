@@ -1,7 +1,4 @@
-"""
-Pydantic schemas for dimension tables
-"""
-
+# app/schemas/dimensions.py
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime, date

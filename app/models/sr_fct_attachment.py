@@ -1,6 +1,5 @@
-# app/models/sr_fct_attachment.py
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
-from sqlalchemy.orm import relationship, foreign
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+from sqlalchemy.orm import relationship
 from app.models.base import Base
 
 from typing import TYPE_CHECKING
@@ -12,8 +11,8 @@ if TYPE_CHECKING:
 class SrFctAttachment(Base):
     __tablename__ = "sr_fct_attachment"
 
-    appkey = Column(String(20), primary_key=True)  # Removed ForeignKey
-    id = Column(Integer, unique=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    appkey = Column(String(20), ForeignKey("sr_fct_header.appkey"), nullable=False)
     keyid = Column(String(20))
     image = Column(String(255))
     image_tag = Column(String(50))
@@ -28,10 +27,5 @@ class SrFctAttachment(Base):
     upload_state = Column(Integer)
     uploaded_by = Column(String(255))
 
-    # Relationships (view-only foreign keys)
-    header = relationship(
-        "SrFctHeader",
-        back_populates="attachments",
-        primaryjoin="foreign(SrFctAttachment.appkey) == SrFctHeader.appkey",
-        viewonly=True,
-    )
+    # Relationship
+    header = relationship("SrFctHeader", back_populates="attachments")

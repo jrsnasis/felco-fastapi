@@ -1,6 +1,5 @@
-# app/models/sr_fct_logsremarksitems.py
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.orm import relationship, foreign
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
 
@@ -15,9 +14,9 @@ class SrFctLogsRemarksItems(Base):
     __tablename__ = "sr_fct_logsremarksitems"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    appkey = Column(String(50), nullable=False)  # Removed ForeignKey
+    appkey = Column(String(50), ForeignKey("sr_fct_items.appkey"), nullable=False)
     keyid = Column(String(50))
-    fk_typeapprovalstatus = Column(Integer)  # Removed ForeignKey
+    fk_typeapprovalstatus = Column(Integer, ForeignKey("sr_dim_typeofapprovalstat.id"))
     remarks = Column(String(255))
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(
@@ -30,16 +29,8 @@ class SrFctLogsRemarksItems(Base):
     type_remarks = Column(String(255))
     created_by = Column(String(225))
 
-    # Relationships (view-only foreign keys)
-    item = relationship(
-        "SrFctItems",
-        back_populates="item_logs",
-        primaryjoin="foreign(SrFctLogsRemarksItems.appkey) == SrFctItems.appkey",
-        viewonly=True,
-    )
+    # Relationships
+    item = relationship("SrFctItems", back_populates="item_logs")
     approval_status = relationship(
-        "SrDimTypeOfApprovalStat",
-        back_populates="item_logs",
-        primaryjoin="foreign(SrFctLogsRemarksItems.fk_typeapprovalstatus) == SrDimTypeOfApprovalStat.id",
-        viewonly=True,
+        "SrDimTypeOfApprovalStat", back_populates="item_logs"
     )

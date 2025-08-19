@@ -1,3 +1,4 @@
+# app/schemas/common.py
 from pydantic import BaseModel, ConfigDict
 from typing import Generic, TypeVar, List
 from datetime import datetime

@@ -1,3 +1,4 @@
+# app/schemas/__init__.py
 from .dimensions import (
     # SR Dimension Type of Approval Status
     SrDimTypeOfApprovalStat,
@@ -88,8 +89,12 @@ from .common import (
     MobileAuditSchemaMixin,
 )
 
+from .sr_sync import (
+    SrSyncResponse,
+)
+
 __version__ = "1.0.0"
-__author__ = "Your Team"
+__author__ = "FELCO LOVE"
 
 __all__ = [
     # Dimension schemas
@@ -161,6 +166,7 @@ __all__ = [
     "DECIMALValidationMixin",
     "AuditSchemaMixin",
     "MobileAuditSchemaMixin",
+    "SrSyncResponse",
 ]
 
 
@@ -173,7 +179,7 @@ DIMENSION_SCHEMAS = [
     "DimMara",
 ]
 
-FACT_SCHEMAS = [
+FCT_SCHEMAS = [
     "FctVisits",
     "SrFctHeader",
     "SrFctItems",

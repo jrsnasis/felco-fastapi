@@ -1,6 +1,5 @@
-# app/models/dimensions.py
-from sqlalchemy import Column, Integer, String, DateTime, Date, DECIMAL
-from sqlalchemy.orm import relationship, foreign
+from sqlalchemy import Column, Integer, String, DateTime, Date, DECIMAL, ForeignKey
+from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
 
@@ -22,19 +21,11 @@ class SrDimTypeOfApprovalStat(Base):
     created_date = Column(DateTime)
     description = Column(String(255))
 
-    # Relationships (view-only foreign keys)
+    # Relationships
     header_logs = relationship(
-        "SrFctLogsRemarksHeader",
-        back_populates="approval_status",
-        primaryjoin="SrDimTypeOfApprovalStat.id == foreign(SrFctLogsRemarksHeader.fk_typeapprovalstatus)",
-        viewonly=True,
+        "SrFctLogsRemarksHeader", back_populates="approval_status"
     )
-    item_logs = relationship(
-        "SrFctLogsRemarksItems",
-        back_populates="approval_status",
-        primaryjoin="SrDimTypeOfApprovalStat.id == foreign(SrFctLogsRemarksItems.fk_typeapprovalstatus)",
-        viewonly=True,
-    )
+    item_logs = relationship("SrFctLogsRemarksItems", back_populates="approval_status")
 
 
 class DimCustomDropdown(Base):
@@ -57,41 +48,29 @@ class DimCustomDropdown(Base):
     created_by = Column(String(255))
     updated_by = Column(String(255))
 
-    # Relationships (view-only foreign keys)
+    # Relationships
     sr_headers_type_request = relationship(
         "SrFctHeader",
-        foreign_keys="SrFctHeader.fk_typerequest",
         back_populates="type_request",
-        primaryjoin="DimCustomDropdown.id == foreign(SrFctHeader.fk_typerequest)",
-        viewonly=True,
+        foreign_keys="SrFctHeader.fk_typerequest",
     )
     sr_headers_reason_return = relationship(
         "SrFctHeader",
-        foreign_keys="SrFctHeader.fk_reasonreturn",
         back_populates="reason_return",
-        primaryjoin="DimCustomDropdown.id == foreign(SrFctHeader.fk_reasonreturn)",
-        viewonly=True,
+        foreign_keys="SrFctHeader.fk_reasonreturn",
     )
     sr_headers_mode_return = relationship(
         "SrFctHeader",
-        foreign_keys="SrFctHeader.fk_modereturn",
         back_populates="mode_return",
-        primaryjoin="DimCustomDropdown.id == foreign(SrFctHeader.fk_modereturn)",
-        viewonly=True,
+        foreign_keys="SrFctHeader.fk_modereturn",
     )
     sr_headers_status = relationship(
-        "SrFctHeader",
-        foreign_keys="SrFctHeader.fk_status",
-        back_populates="status",
-        primaryjoin="DimCustomDropdown.id == foreign(SrFctHeader.fk_status)",
-        viewonly=True,
+        "SrFctHeader", back_populates="status", foreign_keys="SrFctHeader.fk_status"
     )
     sr_items_action_type = relationship(
         "SrFctItems",
-        foreign_keys="SrFctItems.fk_actiontype",
         back_populates="action_type",
-        primaryjoin="DimCustomDropdown.id == foreign(SrFctItems.fk_actiontype)",
-        viewonly=True,
+        foreign_keys="SrFctItems.fk_actiontype",
     )
 
 
@@ -107,9 +86,8 @@ class DimColorCoding(Base):
 class DimCustomer(Base):
     __tablename__ = "dim_customer"
 
-    id = Column(Integer)
-    fspcode = Column(String(4), primary_key=True)
     kunnr = Column(String(10), primary_key=True)
+    fspcode = Column(String(4), primary_key=True)
     name = Column(String(150))
     address = Column(String(150))
     fspemail = Column(String(300))
@@ -127,32 +105,18 @@ class DimCustomer(Base):
     industry_code = Column(String(4))
     sdo_grp = Column(String(2))
 
-    # Relationships (view-only foreign keys)
-    visits = relationship(
-        "FctVisits",
-        back_populates="customer",
-        primaryjoin="and_(DimCustomer.kunnr == foreign(FctVisits.kunnr), DimCustomer.fspcode == foreign(FctVisits.code))",
-        viewonly=True,
-    )
-    headers = relationship(
-        "SrFctHeader",
-        back_populates="customer",
-        primaryjoin="and_(DimCustomer.kunnr == foreign(SrFctHeader.kunnr), DimCustomer.fspcode == foreign(SrFctHeader.code))",
-        viewonly=True,
-    )
-    discounts = relationship(
-        "DimDiscount",
-        back_populates="customer",
-        primaryjoin="DimCustomer.kunnr == foreign(DimDiscount.kunnr)",
-        viewonly=True,
-    )
+    # Relationships
+    visits = relationship("FctVisits", back_populates="customer")
+
+    headers = relationship("SrFctHeader", back_populates="customer")
+    discounts = relationship("DimDiscount", back_populates="customer")
 
 
 class DimDiscount(Base):
     __tablename__ = "dim_discount"
 
-    kunnr = Column(String(10), primary_key=True)
-    matkl = Column(String(9), primary_key=True)
+    kunnr = Column(String(10), ForeignKey("dim_customer.kunnr"), primary_key=True)
+    matkl = Column(String(9), ForeignKey("dim_mara.matkl"), primary_key=True)
     datbi = Column(Date)
     datab = Column(Date)
     kbetr = Column(DECIMAL(18, 2))
@@ -163,19 +127,9 @@ class DimDiscount(Base):
     nsmemail = Column(String(999))
     gsmemail = Column(String(999))
 
-    # Relationships (view-only foreign keys)
-    customer = relationship(
-        "DimCustomer",
-        back_populates="discounts",
-        primaryjoin="foreign(DimDiscount.kunnr) == DimCustomer.kunnr",
-        viewonly=True,
-    )
-    material = relationship(
-        "DimMara",
-        back_populates="discounts",
-        primaryjoin="foreign(DimDiscount.matkl) == DimMara.matkl",
-        viewonly=True,
-    )
+    # Relationships
+    customer = relationship("DimCustomer", back_populates="discounts")
+    material = relationship("DimMara", back_populates="discounts", viewonly=True)
 
 
 class DimMara(Base):
@@ -201,16 +155,6 @@ class DimMara(Base):
     b2b_dim_inventory_level_id = Column(Integer)
     exclusive = Column(Integer)
 
-    # Relationships (view-only foreign keys)
-    sr_items = relationship(
-        "SrFctItems",
-        back_populates="material",
-        primaryjoin="DimMara.matnr == foreign(SrFctItems.matnr)",
-        viewonly=True,
-    )
-    discounts = relationship(
-        "DimDiscount",
-        back_populates="material",
-        primaryjoin="DimMara.matkl == foreign(DimDiscount.matkl)",
-        viewonly=True,
-    )
+    # Relationships
+    sr_items = relationship("SrFctItems", back_populates="material")
+    discounts = relationship("DimDiscount", back_populates="material", viewonly=True)

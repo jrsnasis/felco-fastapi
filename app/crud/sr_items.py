@@ -1,7 +1,6 @@
 # app/crud/sr_items.py
 from sqlalchemy.orm import Session
 from typing import List
-from sqlalchemy import and_
 
 from app.models.sr_fct_items import SrFctItems
 from app.models.sr_fct_header import SrFctHeader

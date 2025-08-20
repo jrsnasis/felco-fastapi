@@ -1,6 +1,6 @@
 # app/crud/fct_visits.py
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 
 from app.models.fct_visits import FctVisits
 

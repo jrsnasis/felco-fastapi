@@ -2,11 +2,6 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from app.models.base import Base
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .sr_fct_header import SrFctHeader
-
 
 class SrFctAttachment(Base):
     __tablename__ = "sr_fct_attachment"

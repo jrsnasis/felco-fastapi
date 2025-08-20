@@ -3,15 +3,6 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .sr_fct_header import SrFctHeader
-    from .sr_fct_logsremarksheader import SrFctLogsRemarksHeader
-    from .sr_fct_logsremarksitems import SrFctLogsRemarksItems
-    from .sr_fct_items import SrFctItems
-    from .fct_visits import FctVisits
-
 
 class SrDimTypeOfApprovalStat(Base):
     __tablename__ = "sr_dim_typeofapprovalstat"

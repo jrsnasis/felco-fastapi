@@ -3,8 +3,6 @@ from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-# from sqlalchemy.ext.declarative import declared_attr
-
 from app.models.base import Base
 
 ModelType = TypeVar("ModelType", bound=Base)

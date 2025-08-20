@@ -11,14 +11,6 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.models.base import Base
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .dimensions import DimCustomDropdown, DimCustomer
-    from .sr_fct_items import SrFctItems
-    from .sr_fct_attachment import SrFctAttachment
-    from .sr_fct_logsremarksheader import SrFctLogsRemarksHeader
-
 
 class SrFctHeader(Base):
     __tablename__ = "sr_fct_header"

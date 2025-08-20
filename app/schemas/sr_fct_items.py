@@ -2,7 +2,6 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
-# from typing import TYPE_CHECKING
 from decimal import Decimal as DECIMAL
 
 

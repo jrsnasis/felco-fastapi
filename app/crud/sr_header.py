@@ -1,6 +1,6 @@
 # app/crud/sr_header.py
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 
 from app.models.sr_fct_header import SrFctHeader
 

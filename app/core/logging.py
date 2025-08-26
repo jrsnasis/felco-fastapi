@@ -1,6 +1,7 @@
 # app/core/logging.py
 import logging
 import sys
+import os
 from typing import Any, Dict
 from app.core.config import get_settings
 
@@ -46,18 +47,15 @@ class ColoredFormatter(logging.Formatter):
 
 
 def setup_logging():
-    """Configure logging for the application"""
+    """Configure logging for the application based on environment"""
     
-    # Base format string
-    base_format = "%(asctime)s | %(levelname)-8s | %(request_id)s | %(name)s | %(message)s"
-    detailed_format = "%(asctime)s | %(levelname)-8s | %(request_id)s | %(name)s | [%(filename)s:%(lineno)d] | %(message)s"
-    
-    # Use detailed format in development
-    log_format = detailed_format if settings.is_development() else base_format
+    # Get environment-specific settings
+    log_level = settings.get_log_level()
+    log_format = settings.get_log_format()
     
     # Configure root logger
     root_logger = logging.getLogger()
-    root_logger.setLevel(settings.get_log_level())
+    root_logger.setLevel(log_level)
     
     # Clear existing handlers
     for handler in root_logger.handlers[:]:
@@ -66,27 +64,24 @@ def setup_logging():
     # Create request ID filter
     request_filter = RequestIDFilter()
     
-    # Console handler with colors
+    # Console handler - always present
     console_handler = logging.StreamHandler(sys.stdout)
     console_formatter = ColoredFormatter(
         fmt=log_format,
-        datefmt="%H:%M:%S",
-        use_colors=True
+        datefmt="%H:%M:%S" if settings.is_development() else "%Y-%m-%d %H:%M:%S",
+        use_colors=settings.is_development()  # Only use colors in development
     )
     console_handler.setFormatter(console_formatter)
     console_handler.addFilter(request_filter)
-    console_handler.setLevel(settings.get_log_level())
-    
-    # Add console handler to root logger
+    console_handler.setLevel(log_level)
     root_logger.addHandler(console_handler)
     
-    # File handler only in development for debugging
-    if settings.is_development():
-        import os
+    # File handler - only in development and staging
+    if not settings.is_production():
         try:
             os.makedirs("logs", exist_ok=True)
             file_handler = logging.FileHandler(
-                filename=f"logs/app.log",
+                filename=f"logs/app_{settings.ENVIRONMENT.lower()}.log",
                 encoding='utf8'
             )
             file_formatter = logging.Formatter(
@@ -100,15 +95,34 @@ def setup_logging():
         except Exception as e:
             print(f"Warning: Could not create file handler: {e}")
     
-    # Configure specific loggers with cleaner setup
-    loggers_config = {
-        "app": settings.get_log_level(),
-        "uvicorn": "INFO",
-        "uvicorn.error": "INFO",
-        "uvicorn.access": "WARNING",
-        "sqlalchemy.engine": "WARNING",
-        "sqlalchemy.pool": "ERROR",
-    }
+    # Configure specific loggers based on environment
+    if settings.is_development():
+        loggers_config = {
+            "app": "DEBUG",
+            "uvicorn": "INFO",
+            "uvicorn.error": "INFO", 
+            "uvicorn.access": "INFO",
+            "sqlalchemy.engine": "INFO",  # Show SQL in development
+            "sqlalchemy.pool": "WARNING",
+        }
+    elif settings.is_staging():
+        loggers_config = {
+            "app": "INFO",
+            "uvicorn": "INFO",
+            "uvicorn.error": "INFO",
+            "uvicorn.access": "WARNING",
+            "sqlalchemy.engine": "ERROR",
+            "sqlalchemy.pool": "ERROR",
+        }
+    else:  # production
+        loggers_config = {
+            "app": "WARNING",
+            "uvicorn": "WARNING",
+            "uvicorn.error": "ERROR",
+            "uvicorn.access": "ERROR",
+            "sqlalchemy.engine": "ERROR",
+            "sqlalchemy.pool": "ERROR",
+        }
     
     for logger_name, level in loggers_config.items():
         logger = logging.getLogger(logger_name)
@@ -117,7 +131,9 @@ def setup_logging():
     
     # Set up app logger and log initial message
     app_logger = logging.getLogger("app")
-    app_logger.info(f"Logging configured - Environment: {settings.ENVIRONMENT} | Level: {settings.get_log_level()}")
+    app_logger.info(
+        f"Logging configured - Environment: {settings.ENVIRONMENT} | Level: {log_level}"
+    )
     
     return app_logger
 

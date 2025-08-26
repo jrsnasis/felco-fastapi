@@ -2774,3 +2774,47 @@ WHERE sr_fct_header.fspemail = %(fspemail_1)s OR sr_fct_header.rsmemail = %(rsme
 2025-08-20 15:21:47 | INFO     | no-request-id | app.main | [main.py:48] | Shutting down FELCO FastAPI
 2025-08-20 15:21:47 | INFO     | no-request-id | uvicorn.error | [on.py:76] | Application shutdown complete.
 2025-08-20 15:21:47 | INFO     | no-request-id | uvicorn.error | [server.py:94] | Finished server process [19348]
+2025-08-26 13:26:54 | INFO     | no-request-id | app | [logging.py:120] | Logging configured - Environment: development | Level: INFO
+2025-08-26 13:26:54 | INFO     | no-request-id | uvicorn.error | [server.py:84] | Started server process [16872]
+2025-08-26 13:26:54 | INFO     | no-request-id | uvicorn.error | [on.py:48] | Waiting for application startup.
+2025-08-26 13:26:54 | INFO     | no-request-id | app.main | [main.py:34] | Starting FELCO FastAPI v1.0.0
+2025-08-26 13:26:54 | INFO     | no-request-id | app.main | [main.py:35] | Environment: development
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | SELECT DATABASE()
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | SELECT @@sql_mode
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | SELECT @@lower_case_table_names
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:2702] | BEGIN (implicit)
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`sr_dim_typeofapprovalstat`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`dim_custom_dropdown`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`dim_color_coding`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`dim_customer`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`dim_discount`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`dim_mara`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`sr_fct_header`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`sr_fct_items`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`sr_fct_attachment`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`sr_fct_logsremarksheader`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`sr_fct_logsremarksitems`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | DESCRIBE `sales_return`.`fct_visits`
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:1846] | [raw sql] {}
+2025-08-26 13:26:54 | INFO     | no-request-id | sqlalchemy.engine.Engine | [base.py:2708] | COMMIT
+2025-08-26 13:26:54 | INFO     | no-request-id | app.main | [main.py:40] | Database tables created/verified successfully
+2025-08-26 13:26:54 | INFO     | no-request-id | uvicorn.error | [on.py:62] | Application startup complete.
+2025-08-26 13:30:04 | INFO     | no-request-id | uvicorn.error | [server.py:264] | Shutting down
+2025-08-26 13:30:04 | INFO     | no-request-id | uvicorn.error | [on.py:67] | Waiting for application shutdown.
+2025-08-26 13:30:04 | INFO     | no-request-id | app.main | [main.py:48] | Shutting down FELCO FastAPI
+2025-08-26 13:30:04 | INFO     | no-request-id | uvicorn.error | [on.py:76] | Application shutdown complete.
+2025-08-26 13:30:04 | INFO     | no-request-id | uvicorn.error | [server.py:94] | Finished server process [16872]

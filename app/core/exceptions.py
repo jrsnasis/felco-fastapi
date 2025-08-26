@@ -1,8 +1,9 @@
 # app/core/exceptions.py
 from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from typing import Optional, Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel
 import logging
 import traceback
@@ -33,6 +34,7 @@ class ErrorResponse(BaseModel):
     field: Optional[str] = None
     request_id: Optional[str] = None
     stack_trace: Optional[str] = None
+    environment: Optional[str] = None  # Added for environment context
 
 
 class ValidationErrorResponse(BaseModel):
@@ -44,6 +46,7 @@ class ValidationErrorResponse(BaseModel):
     code: str = "VALIDATION_ERROR"
     validation_errors: List[ValidationErrorDetail]
     request_id: Optional[str] = None
+    environment: Optional[str] = None
 
 
 # Base Custom Exception
@@ -178,6 +181,40 @@ def get_request_info(request: Request) -> Dict[str, Any]:
     }
 
 
+def create_error_response(
+    status_code: int,
+    message: str,
+    code: str,
+    request_info: Dict[str, Any],
+    details: Optional[str] = None,
+    field: Optional[str] = None,
+    include_stack_trace: bool = False,
+    exception: Optional[Exception] = None
+) -> ErrorResponse:
+    """Create standardized error response"""
+    
+    error_response = ErrorResponse(
+        timestamp=datetime.now(timezone.utc),
+        status_code=status_code,
+        path=request_info['path'],
+        message=message,
+        code=code,
+        details=details,
+        field=field,
+        request_id=request_info['request_id'],
+        environment=settings.ENVIRONMENT if not settings.is_production() else None
+    )
+    
+    # Add stack trace based on settings and environment
+    if include_stack_trace and settings.include_stack_trace:
+        if exception:
+            error_response.stack_trace = ''.join(traceback.format_exception(type(exception), exception, exception.__traceback__))
+        else:
+            error_response.stack_trace = traceback.format_exc()
+    
+    return error_response
+
+
 # Exception Handlers
 async def base_custom_exception_handler(request: Request, exc: BaseCustomException) -> JSONResponse:
     """Global exception handler for custom exceptions"""
@@ -194,33 +231,26 @@ async def base_custom_exception_handler(request: Request, exc: BaseCustomExcepti
             "path": request_info['path'],
             "method": request_info['method'],
             "status_code": exc.status_code,
-            "error_code": exc.code
+            "error_code": exc.code,
+            "client_ip": request_info['client_ip']
         }
     )
     
-    error_response = ErrorResponse(
-        timestamp=datetime.utcnow(),
+    error_response = create_error_response(
         status_code=exc.status_code,
-        path=request_info['path'],
         message=exc.message,
         code=exc.code,
+        request_info=request_info,
         details=exc.details,
         field=exc.field,
-        request_id=request_info['request_id']
+        include_stack_trace=exc.status_code >= 500
     )
-    
-    # Add stack trace in development for 500 errors
-    if settings.is_development() and settings.INCLUDE_STACK_TRACE and exc.status_code >= 500:
-        error_response.stack_trace = traceback.format_exc()
     
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response.model_dump(mode="json", exclude_none=True)
     )
 
-
-# Validation Exception Handler
-from fastapi.exceptions import RequestValidationError
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     """Handler for FastAPI validation errors"""
@@ -235,14 +265,15 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             field=field,
             message=error["msg"],
             type=error["type"],
-            input=error.get("input")
+            input=error.get("input") if not settings.is_production() else None  # Hide input in production
         ))
     
     error_response = ValidationErrorResponse(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         path=request_info['path'],
         validation_errors=validation_errors,
-        request_id=request_info['request_id']
+        request_id=request_info['request_id'],
+        environment=settings.ENVIRONMENT if not settings.is_production() else None
     )
     
     logger.warning(
@@ -251,7 +282,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             "request_id": request_info['request_id'],
             "path": request_info['path'],
             "method": request_info['method'],
-            "validation_errors": [{"field": ve.field, "type": ve.type} for ve in validation_errors]
+            "validation_errors": [{"field": ve.field, "type": ve.type} for ve in validation_errors],
+            "client_ip": request_info['client_ip']
         }
     )
     
@@ -261,7 +293,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
-# Generic HTTP Exception Handler
 async def http_exception_handler_custom(request: Request, exc: HTTPException) -> JSONResponse:
     """Handler for generic HTTP exceptions"""
     
@@ -283,13 +314,11 @@ async def http_exception_handler_custom(request: Request, exc: HTTPException) ->
     
     error_code = error_codes.get(exc.status_code, f"HTTP_{exc.status_code}")
     
-    error_response = ErrorResponse(
-        timestamp=datetime.utcnow(),
+    error_response = create_error_response(
         status_code=exc.status_code,
-        path=request_info['path'],
         message=str(exc.detail),
         code=error_code,
-        request_id=request_info['request_id']
+        request_info=request_info
     )
     
     log_level = logging.ERROR if exc.status_code >= 500 else logging.WARNING
@@ -300,7 +329,8 @@ async def http_exception_handler_custom(request: Request, exc: HTTPException) ->
             "request_id": request_info['request_id'],
             "path": request_info['path'],
             "method": request_info['method'],
-            "status_code": exc.status_code
+            "status_code": exc.status_code,
+            "client_ip": request_info['client_ip']
         }
     )
     
@@ -310,7 +340,6 @@ async def http_exception_handler_custom(request: Request, exc: HTTPException) ->
     )
 
 
-# Generic Exception Handler for unhandled exceptions
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handler for any unhandled exceptions"""
     
@@ -324,27 +353,27 @@ async def generic_exception_handler(request: Request, exc: Exception) -> JSONRes
             "request_id": request_info['request_id'],
             "path": request_info['path'],
             "method": request_info['method'],
-            "exception_type": type(exc).__name__
+            "exception_type": type(exc).__name__,
+            "client_ip": request_info['client_ip']
         }
     )
     
-    # Hide internal details in production
-    message = "An unexpected error occurred"
+    # Environment-specific error messages
     if settings.is_development():
         message = f"{type(exc).__name__}: {str(exc)}"
+    elif settings.is_staging():
+        message = "An error occurred while processing your request"
+    else:  # production
+        message = "An unexpected error occurred"
     
-    error_response = ErrorResponse(
-        timestamp=datetime.utcnow(),
+    error_response = create_error_response(
         status_code=500,
-        path=request_info['path'],
         message=message,
         code="INTERNAL_SERVER_ERROR",
-        request_id=request_info['request_id']
+        request_info=request_info,
+        include_stack_trace=True,
+        exception=exc
     )
-    
-    # Add stack trace in development
-    if settings.is_development() and settings.INCLUDE_STACK_TRACE:
-        error_response.stack_trace = traceback.format_exc()
     
     return JSONResponse(
         status_code=500,

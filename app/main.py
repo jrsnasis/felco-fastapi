@@ -12,7 +12,6 @@ from app.api.v1.api import api_router
 from app.db.database import engine
 from app.models import Base
 
-# Import exception handlers and middleware
 from app.core.exceptions import (
     BaseCustomException,
     base_custom_exception_handler,
@@ -22,7 +21,7 @@ from app.core.exceptions import (
 )
 from app.core.middleware import RequestIDMiddleware, LoggingMiddleware
 
-# Setup logging first - this must happen before getting settings
+# Setup logging first
 setup_logging()
 logger = get_logger("main")
 
@@ -31,8 +30,6 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Application lifespan manager"""
-    # Startup
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.debug_mode}")
@@ -40,7 +37,6 @@ async def lifespan(app: FastAPI):
     logger.info(f"CORS origins: {settings.cors_origins}")
 
     try:
-        # Create database tables
         Base.metadata.create_all(bind=engine)
         logger.info("Database tables created/verified successfully")
     except Exception as e:
@@ -49,11 +45,9 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    # Shutdown
     logger.info(f"Shutting down {settings.APP_NAME}")
 
 
-# Create FastAPI instance with environment-specific settings
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
@@ -64,11 +58,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add Custom Middleware (order matters!)
+# Middleware
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(RequestIDMiddleware)
-
-# Add CORS middleware with environment-specific settings
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -78,57 +70,47 @@ app.add_middleware(
     expose_headers=["X-Request-ID", "X-Process-Time"],
 )
 
-# Register Exception Handlers (order matters - most specific first)
+# Exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(BaseCustomException, base_custom_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler_custom)
 app.add_exception_handler(Exception, generic_exception_handler)
 
-# Include API router
+# Routers
 app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/")
 async def root():
-    """Root endpoint with application info"""
     response_data = {
         "message": f"Welcome to {settings.APP_NAME}",
         "version": settings.APP_VERSION,
         "status": "running",
     }
-
-    # Add environment info in non-production
     if not settings.is_production():
         response_data["environment"] = settings.ENVIRONMENT
         response_data["debug_mode"] = settings.debug_mode
-
     return response_data
 
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
     response_data = {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": settings.APP_VERSION,
     }
-
-    # Add environment info in non-production
     if not settings.is_production():
         response_data["environment"] = settings.ENVIRONMENT
         response_data["debug_mode"] = settings.debug_mode
         response_data["database_echo"] = settings.database_echo
-
     return response_data
 
 
-# Environment-specific debug endpoints (only available in development)
 if settings.is_development():
 
     @app.get("/debug/settings")
     async def debug_settings():
-        """Debug endpoint to view current settings"""
         return {
             "environment": settings.ENVIRONMENT,
             "debug_mode": settings.debug_mode,
@@ -141,14 +123,12 @@ if settings.is_development():
 
     @app.get("/debug/exception")
     async def debug_exception():
-        """Debug endpoint to test exception handling"""
         raise Exception("This is a test exception for debugging")
 
 
-# Add startup event logging
 @app.on_event("startup")
 async def startup_event():
-    """Log startup information"""
     logger.info("Application startup complete")
     if settings.is_development():
         logger.debug("Debug endpoints available at /debug/*")
+        logger.debug(f"Loaded settings: {settings.dict()}")  # 👈 optional

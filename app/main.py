@@ -131,4 +131,3 @@ async def startup_event():
     logger.info("Application startup complete")
     if settings.is_development():
         logger.debug("Debug endpoints available at /debug/*")
-        logger.debug(f"Loaded settings: {settings.dict()}")  # 👈 optional

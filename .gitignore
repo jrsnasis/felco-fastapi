@@ -4,9 +4,7 @@ __pycache__/
 
 # Environment
 .env
-.env.development
-.env.staging
-.env.production
+.env.*
 .venv/
 venv/
 env/

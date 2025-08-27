@@ -35,5 +35,4 @@ async def get_sr_headers_by_email(
     return SuccessResponse(
         data=headers,
         message="Successfully retrieved Sales Return headers",
-        count=len(headers),
     )

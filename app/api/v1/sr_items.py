@@ -35,5 +35,4 @@ async def get_sr_items_by_email(
     return SuccessResponse(
         data=items,
         message="Successfully retrieved Sales Return items",
-        count=len(items),
     )

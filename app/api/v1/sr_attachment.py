@@ -35,5 +35,4 @@ async def get_sr_attachments_by_email(
     return SuccessResponse(
         data=attachments,
         message="Successfully retrieved Sales Return attachments",
-        count=len(attachments),
     )

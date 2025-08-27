@@ -18,7 +18,7 @@ from app.core.exceptions import (
     base_custom_exception_handler,
     validation_exception_handler,
     http_exception_handler_custom,
-    generic_exception_handler
+    generic_exception_handler,
 )
 from app.core.middleware import RequestIDMiddleware, LoggingMiddleware
 
@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Debug mode: {settings.debug_mode}")
     logger.info(f"Database echo: {settings.database_echo}")
     logger.info(f"CORS origins: {settings.cors_origins}")
-    
+
     try:
         # Create database tables
         Base.metadata.create_all(bind=engine)
@@ -46,9 +46,9 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to create database tables: {e}", exc_info=True)
         raise
-    
+
     yield
-    
+
     # Shutdown
     logger.info(f"Shutting down {settings.APP_NAME}")
 
@@ -75,7 +75,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["X-Request-ID", "X-Process-Time"]
+    expose_headers=["X-Request-ID", "X-Process-Time"],
 )
 
 # Register Exception Handlers (order matters - most specific first)
@@ -94,14 +94,14 @@ async def root():
     response_data = {
         "message": f"Welcome to {settings.APP_NAME}",
         "version": settings.APP_VERSION,
-        "status": "running"
+        "status": "running",
     }
-    
+
     # Add environment info in non-production
     if not settings.is_production():
         response_data["environment"] = settings.ENVIRONMENT
         response_data["debug_mode"] = settings.debug_mode
-    
+
     return response_data
 
 
@@ -111,20 +111,21 @@ async def health_check():
     response_data = {
         "status": "healthy",
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "version": settings.APP_VERSION
+        "version": settings.APP_VERSION,
     }
-    
+
     # Add environment info in non-production
     if not settings.is_production():
         response_data["environment"] = settings.ENVIRONMENT
         response_data["debug_mode"] = settings.debug_mode
         response_data["database_echo"] = settings.database_echo
-    
+
     return response_data
 
 
 # Environment-specific debug endpoints (only available in development)
 if settings.is_development():
+
     @app.get("/debug/settings")
     async def debug_settings():
         """Debug endpoint to view current settings"""
@@ -135,9 +136,9 @@ if settings.is_development():
             "log_level": settings.get_log_level(),
             "cors_origins": settings.cors_origins,
             "include_stack_trace": settings.include_stack_trace,
-            "show_docs": settings.show_docs
+            "show_docs": settings.show_docs,
         }
-    
+
     @app.get("/debug/exception")
     async def debug_exception():
         """Debug endpoint to test exception handling"""
@@ -151,4 +152,3 @@ async def startup_event():
     logger.info("Application startup complete")
     if settings.is_development():
         logger.debug("Debug endpoints available at /debug/*")
-        

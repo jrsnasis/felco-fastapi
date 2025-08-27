@@ -25,7 +25,7 @@ def get_db_session() -> Generator[Session, None, None]:
         db = next(get_db())
         yield db
         logger.debug("Database session completed successfully")
-        
+
     except BaseCustomException:
         # These are business logic exceptions
         if db:
@@ -34,7 +34,7 @@ def get_db_session() -> Generator[Session, None, None]:
             except Exception:
                 pass
         raise
-        
+
     except (DatabaseError, OperationalError) as e:
         # These are actual database connection/server issues
         logger.error(f"Database connection error: {str(e)}", exc_info=True)
@@ -44,7 +44,7 @@ def get_db_session() -> Generator[Session, None, None]:
             except Exception:
                 pass
         raise DatabaseException("Database connection failed", details=str(e))
-        
+
     except SQLAlchemyError as e:
         # Other SQLAlchemy errors - could be configuration issues
         logger.error(f"SQLAlchemy error: {str(e)}", exc_info=True)
@@ -54,17 +54,22 @@ def get_db_session() -> Generator[Session, None, None]:
             except Exception:
                 pass
         raise DatabaseException("Database query failed", details=str(e))
-        
+
     except Exception as e:
         # Any other unexpected errors (not business logic)
-        logger.error(f"Unexpected database session error: {type(e).__name__}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Unexpected database session error: {type(e).__name__}: {str(e)}",
+            exc_info=True,
+        )
         if db:
             try:
                 db.rollback()
             except Exception:
                 pass
-        raise DatabaseException("Unexpected database error", details=f"{type(e).__name__}: {str(e)}")
-        
+        raise DatabaseException(
+            "Unexpected database error", details=f"{type(e).__name__}: {str(e)}"
+        )
+
     finally:
         if db:
             try:
@@ -76,7 +81,7 @@ def get_db_session() -> Generator[Session, None, None]:
 
 def get_request_id(request: Request) -> str:
     """Get request ID from request state with fallback"""
-    request_id = getattr(request.state, 'request_id', None)
+    request_id = getattr(request.state, "request_id", None)
     if not request_id:
         request_id = str(uuid.uuid4())
         request.state.request_id = request_id

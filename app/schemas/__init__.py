@@ -134,7 +134,7 @@ __all__ = [
     "SrFctLogsRemarksItemsResponse",
     "SrFctLogsRemarksItemsDetailResponse",
     "SrFctLogsRemarksItemsListResponse",
-    "SrSyncResponse"
+    "SrSyncResponse",
 ]
 
 

@@ -24,16 +24,16 @@ async def get_sr_items_by_email(
     # Validate email format
     if not email or "@" not in email:
         raise InvalidEmailException(email)
-    
+
     # Get data from database
     items = sr_items_crud.get_by_email(db=db, email=email)
-    
+
     # Check if data exists
     if not items:
         raise SRItemsNotFoundException(f"email: {email}")
-    
+
     return SuccessResponse(
         data=items,
         message="Successfully retrieved Sales Return items",
-        count=len(items)
+        count=len(items),
     )

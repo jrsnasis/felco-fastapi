@@ -38,11 +38,13 @@ class SrFctItemsBase(BaseSchema):
 
 class SrFctItemsCreate(SrFctItemsBase):
     """Schema for creating new SR item records"""
+
     pass
 
 
 class SrFctItemsUpdate(BaseSchema):
     """Schema for updating SR item records"""
+
     appkey: Optional[str] = None
     keyid: Optional[str] = None
     matnr: Optional[str] = None
@@ -67,6 +69,7 @@ class SrFctItemsUpdate(BaseSchema):
 
 class SrFctItemsResponse(SrFctItemsBase):
     """Base schema for SR item responses"""
+
     id: int
     created_at: datetime
     updated_at: datetime
@@ -76,6 +79,7 @@ class SrFctItemsResponse(SrFctItemsBase):
 
 class SrFctItemsListResponse(BaseSchema):
     """Paginated list response for SR items"""
+
     items: List[SrFctItemsResponse]
     total: int
     skip: int

@@ -24,16 +24,16 @@ async def get_sr_header_logs_by_email(
     # Validate email format
     if not email or "@" not in email:
         raise InvalidEmailException(email)
-    
+
     # Get data from database
     header_logs = sr_logsremarksheader_crud.get_by_email(db=db, email=email)
-    
+
     # Check if data exists
     if not header_logs:
         raise SRNotFoundException("Header Logs", f"email: {email}")
-    
+
     return SuccessResponse(
         data=header_logs,
         message="Successfully retrieved Sales Return header logs",
-        count=len(header_logs)
+        count=len(header_logs),
     )

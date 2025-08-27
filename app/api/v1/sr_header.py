@@ -24,17 +24,16 @@ async def get_sr_headers_by_email(
     # Validate email format
     if not email or "@" not in email:
         raise InvalidEmailException(email)
-    
+
     # Get data from database
     headers = sr_header_crud.get_by_email(db=db, email=email)
-    
+
     # Check if data exists
     if not headers:
         raise SRHeaderNotFoundException(f"email: {email}")
-    
+
     return SuccessResponse(
         data=headers,
         message="Successfully retrieved Sales Return headers",
-        count=len(headers)
+        count=len(headers),
     )
-    

@@ -15,7 +15,6 @@ from datetime import datetime
 from app.models.base import Base
 
 
-
 class FctVisits(Base):
     __tablename__ = "fct_visits"
 

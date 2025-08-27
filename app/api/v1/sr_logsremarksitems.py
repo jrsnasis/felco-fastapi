@@ -24,16 +24,16 @@ async def get_sr_items_logs_by_email(
     # Validate email format
     if not email or "@" not in email:
         raise InvalidEmailException(email)
-    
+
     # Get data from database
     items_logs = sr_logsremarksitems_crud.get_by_email(db=db, email=email)
-    
+
     # Check if data exists
     if not items_logs:
         raise SRNotFoundException("Items Logs", f"email: {email}")
-    
+
     return SuccessResponse(
         data=items_logs,
         message="Successfully retrieved Sales Return items logs",
-        count=len(items_logs)
+        count=len(items_logs),
     )

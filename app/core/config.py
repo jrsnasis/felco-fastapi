@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
     
     # Environment - this determines all other behaviors
-    ENVIRONMENT: str = "production"  # production, development, staging
+    ENVIRONMENT: str = "development"  # production, development, staging
     
     # Database
     DATABASE_URL: str

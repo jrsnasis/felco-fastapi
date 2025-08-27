@@ -1,5 +1,5 @@
 # app/db/database.py
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
@@ -115,3 +115,19 @@ async def get_database_status():
             "status": "unhealthy",
             "error": str(e) if not settings.is_production() else "Database error",
         }
+
+
+def verify_tables(engine, base, logger=logger):
+    """Verify that all ORM tables exist in the database (no creation)."""
+    inspector = inspect(engine)
+    existing_tables = inspector.get_table_names()
+    missing_tables = []
+
+    for table in base.metadata.tables.keys():
+        if table not in existing_tables:
+            missing_tables.append(table)
+
+    if missing_tables:
+        logger.warning(f"Missing tables detected (not auto-created): {missing_tables}")
+    else:
+        logger.info("All ORM tables verified successfully (no creation attempted)")

@@ -63,6 +63,11 @@ class DimCustomDropdown(Base):
         back_populates="action_type",
         foreign_keys="SrFctItems.fk_actiontype",
     )
+    sr_srr_type = relationship(
+        "SrFctHeader",
+        back_populates="srr_type",
+        foreign_keys="SrFctHeader.fk_srrtype",
+    )
 
 
 class DimColorCoding(Base):

@@ -25,6 +25,7 @@ class SrFctHeader(Base):
     fk_modereturn = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
     fk_status = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
     channel = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
+    fk_srrtype = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
 
     # Composite FK → DimCustomer
     kunnr = Column(String(10), nullable=False)
@@ -48,6 +49,7 @@ class SrFctHeader(Base):
     gsmemail = Column(String(50))
     rsmemail = Column(String(50))
     fspemail = Column(String(50))
+    # ssaemail = Column(String(100))  # Added for further ehancements
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     m_created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
@@ -89,6 +91,11 @@ class SrFctHeader(Base):
         "DimCustomDropdown",
         foreign_keys=[fk_status],
         back_populates="sr_headers_status",
+    )
+    srr_type = relationship(
+        "DimCustomDropdown",
+        foreign_keys=[fk_srrtype],
+        back_populates="sr_srr_type",
     )
     customer = relationship("DimCustomer", back_populates="headers")
 

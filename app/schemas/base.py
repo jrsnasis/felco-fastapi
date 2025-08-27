@@ -1,7 +1,7 @@
 # app/schemas/base.py - CLEANED VERSION
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, Generic, TypeVar
-from datetime import datetime
+from datetime import datetime, timezone
 
 T = TypeVar("T")
 
@@ -23,12 +23,10 @@ class SuccessResponse(BaseModel, Generic[T]):
     status_code: int = Field(default=200, description="HTTP status code")
     message: str = Field(description="Human-readable success message")
     timestamp: datetime = Field(
-        default_factory=datetime.utcnow, description="Response timestamp"
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Response timestamp",
     )
     data: T = Field(description="Response data")
-    count: Optional[int] = Field(
-        default=None, description="Number of records returned (for lists)"
-    )
 
     class Config:
         json_encoders = {datetime: lambda v: v.isoformat()}

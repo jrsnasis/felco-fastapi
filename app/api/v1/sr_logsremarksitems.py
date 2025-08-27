@@ -35,5 +35,4 @@ async def get_sr_items_logs_by_email(
     return SuccessResponse(
         data=items_logs,
         message="Successfully retrieved Sales Return items logs",
-        count=len(items_logs),
     )

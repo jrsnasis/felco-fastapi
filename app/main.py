@@ -9,7 +9,7 @@ import logging
 from app.core.config import get_settings
 from app.core.logging import setup_logging, get_logger
 from app.api.v1.api import api_router
-from app.db.database import engine
+from app.db.database import engine, verify_tables
 from app.models import Base
 
 from app.core.exceptions import (
@@ -37,10 +37,9 @@ async def lifespan(app: FastAPI):
     logger.info(f"CORS origins: {settings.cors_origins}")
 
     try:
-        Base.metadata.create_all(bind=engine)
-        logger.info("Database tables created/verified successfully")
+        verify_tables(engine, Base)
     except Exception as e:
-        logger.error(f"Failed to create database tables: {e}", exc_info=True)
+        logger.error(f"Database verification failed: {e}", exc_info=True)
         raise
 
     yield

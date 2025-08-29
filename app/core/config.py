@@ -65,25 +65,6 @@ class Settings(BaseSettings):
 
     # ---------- PROPER CONFIGURATION ----------
 
-    # @property
-    # def cors_origins(self) -> List[str]:
-    # if self.is_development():
-    #     return [
-    #         "http://localhost:3000",
-    #         "http://localhost:3001",
-    #         "http://localhost:8080",
-    #         "http://localhost:8000",
-    #         "http://127.0.0.1:3000",
-    #         "http://127.0.0.1:8080",
-    #         "http://127.0.0.1:8000",
-    #     ]
-    # elif self.is_staging():
-    #     return ["https://staging.yourapp.com"]
-    # else:
-    #     return ["https://yourapp.com"]
-
-    # ---------- TEST CONFIGURATION ----------
-
     @property
     def cors_origins(self) -> List[str]:
         if self.is_development():
@@ -97,25 +78,44 @@ class Settings(BaseSettings):
                 "http://127.0.0.1:8000",
             ]
         elif self.is_staging():
-            return [
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:8080",
-                "http://localhost:8000",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:8080",
-                "http://127.0.0.1:8000",
-            ]
+            return ["https://staging.salesreturn.com"]
         else:
-            return [
-                "http://localhost:3000",
-                "http://localhost:3001",
-                "http://localhost:8080",
-                "http://localhost:8000",
-                "http://127.0.0.1:3000",
-                "http://127.0.0.1:8080",
-                "http://127.0.0.1:8000",
-            ]
+            return ["https://salesreturn.com"]
+
+    # ---------- TEST CONFIGURATION ----------
+
+    # @property
+    # def cors_origins(self) -> List[str]:
+    #     if self.is_development():
+    #         return [
+    #             "http://localhost:3000",
+    #             "http://localhost:3001",
+    #             "http://localhost:8080",
+    #             "http://localhost:8000",
+    #             "http://127.0.0.1:3000",
+    #             "http://127.0.0.1:8080",
+    #             "http://127.0.0.1:8000",
+    #         ]
+    #     elif self.is_staging():
+    #         return [
+    #             "http://localhost:3000",
+    #             "http://localhost:3001",
+    #             "http://localhost:8080",
+    #             "http://localhost:8000",
+    #             "http://127.0.0.1:3000",
+    #             "http://127.0.0.1:8080",
+    #             "http://127.0.0.1:8000",
+    #         ]
+    #     else:
+    #         return [
+    #             "http://localhost:3000",
+    #             "http://localhost:3001",
+    #             "http://localhost:8080",
+    #             "http://localhost:8000",
+    #             "http://127.0.0.1:3000",
+    #             "http://127.0.0.1:8080",
+    #             "http://127.0.0.1:8000",
+    #         ]
 
     def get_log_level(self) -> str:
         if self.is_development():

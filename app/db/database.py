@@ -3,6 +3,7 @@ from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
+from sqlalchemy.exc import OperationalError
 import logging
 
 from app.core.config import get_settings
@@ -15,21 +16,27 @@ engine_kwargs = {
     "pool_pre_ping": True,
     "pool_recycle": 3600,
     "echo": settings.database_echo,
+    "connect_args": {
+        "connect_timeout": 60,
+        "read_timeout": 60,
+        "write_timeout": 60,
+        "charset": "utf8mb4",
+    },
 }
 
-# Production-specific optimizations
-if settings.is_production():
+# Production/Staging-specific optimizations
+if settings.is_production() or settings.is_staging():
     engine_kwargs.update(
         {
             "poolclass": QueuePool,
-            "pool_size": 20,
-            "max_overflow": 30,
+            "pool_size": 10,
+            "max_overflow": 20,
             "pool_timeout": 30,
-            "pool_recycle": 1800,  # Shorter recycle time in production
+            "pool_recycle": 1800,
         }
     )
 else:
-    # Development/staging settings
+    # Development settings
     engine_kwargs.update(
         {
             "pool_size": 5,
@@ -117,17 +124,37 @@ async def get_database_status():
         }
 
 
+def verify_tables_with_retry(engine, base, max_retries=3, logger=logger):
+    """Verify tables with retry logic for Railway deployment"""
+    for attempt in range(max_retries):
+        try:
+            inspector = inspect(engine)
+            existing_tables = inspector.get_table_names()
+            missing_tables = []
+
+            for table in base.metadata.tables.keys():
+                if table not in existing_tables:
+                    missing_tables.append(table)
+
+            if missing_tables:
+                logger.warning(f"Missing tables detected: {missing_tables}")
+            else:
+                logger.info("All ORM tables verified successfully")
+            return True
+
+        except OperationalError as e:
+            logger.warning(f"Database verification attempt {attempt + 1} failed: {e}")
+            if attempt < max_retries - 1:
+                import time
+
+                time.sleep(5 * (attempt + 1))  # Exponential backoff
+            else:
+                logger.error(
+                    f"Database verification failed after {max_retries} attempts"
+                )
+                raise e
+
+
+# Update your verify_tables function
 def verify_tables(engine, base, logger=logger):
-    """Verify that all ORM tables exist in the database (no creation)."""
-    inspector = inspect(engine)
-    existing_tables = inspector.get_table_names()
-    missing_tables = []
-
-    for table in base.metadata.tables.keys():
-        if table not in existing_tables:
-            missing_tables.append(table)
-
-    if missing_tables:
-        logger.warning(f"Missing tables detected (not auto-created): {missing_tables}")
-    else:
-        logger.info("All ORM tables verified successfully (no creation attempted)")
+    return verify_tables_with_retry(engine, base, logger=logger)

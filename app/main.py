@@ -9,7 +9,7 @@ import logging
 from app.core.config import get_settings
 from app.core.logging import setup_logging, get_logger
 from app.api.v1.api import api_router
-from app.db.database import engine, verify_tables
+from app.db.database import engine, verify_tables, get_database_status
 from app.models import Base
 
 from app.core.exceptions import (
@@ -36,11 +36,30 @@ async def lifespan(app: FastAPI):
     logger.info(f"Database echo: {settings.database_echo}")
     logger.info(f"CORS origins: {settings.cors_origins}")
 
-    try:
-        verify_tables(engine, Base)
-    except Exception as e:
-        logger.error(f"Database verification failed: {e}", exc_info=True)
-        raise
+    # Test database connection with retries
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            logger.info(
+                f"Testing database connection (attempt {attempt + 1}/{max_retries})..."
+            )
+            verify_tables(engine, Base)
+            logger.info("Database connection and verification successful")
+            break
+        except Exception as e:
+            logger.error(f"Database verification failed (attempt {attempt + 1}): {e}")
+            if attempt < max_retries - 1:
+                import asyncio
+
+                await asyncio.sleep(5 * (attempt + 1))  # Exponential backoff
+            else:
+                logger.error("Max database connection retries exceeded")
+                # You can choose to either raise the exception or continue without DB
+                # For staging, you might want to continue and handle DB errors gracefully
+                if settings.is_staging():
+                    logger.warning("Continuing startup without database verification")
+                else:
+                    raise
 
     yield
 
@@ -99,10 +118,20 @@ async def health_check():
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "version": settings.APP_VERSION,
     }
+
+    # Test database connection
+    try:
+        db_status = await get_database_status()
+        response_data["database"] = db_status
+    except Exception as e:
+        response_data["database"] = {"status": "unhealthy", "error": str(e)}
+        response_data["status"] = "degraded"
+
     if not settings.is_production():
         response_data["environment"] = settings.ENVIRONMENT
         response_data["debug_mode"] = settings.debug_mode
         response_data["database_echo"] = settings.database_echo
+
     return response_data
 
 

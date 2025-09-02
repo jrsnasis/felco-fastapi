@@ -10,11 +10,11 @@ class SrFctItems(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # FKs
-    appkey = Column(String(255), ForeignKey("sr_fct_header.appkey"), nullable=False)
+    appkey = Column(String(255))
     matnr = Column(String(255), ForeignKey("dim_mara.matnr"))
     fk_actiontype = Column(Integer, ForeignKey("dim_custom_dropdown.id"))
+    keyid = Column(String(255), ForeignKey("sr_fct_header.keyid"), nullable=False)
 
-    keyid = Column(String(255))
     discount = Column(DECIMAL(18, 2), nullable=False, default=0.00)
     qty = Column(Integer, nullable=False, default=0)
     srp = Column(DECIMAL(11, 2))

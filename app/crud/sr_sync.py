@@ -27,25 +27,21 @@ class CRUDSrSync:
         else:
             return "unknown"
 
-    def get_sr_data_by_email(
-        self, db: Session, *, email: str, keyid: Optional[str] = None
-    ) -> Dict:
+    def get_sr_data_by_email(self, db: Session, *, email: str) -> Dict:
         """Get all SR data structured according to the required JSON format"""
 
         # Base query for headers - removed ssaemail for now
-        header_query = db.query(SrFctHeader).filter(
-            or_(
-                SrFctHeader.fspemail == email,
-                SrFctHeader.rsmemail == email,
-                # SrFctHeader.ssaemail == email  # Removed for now - future enhancement
+        headers = (
+            db.query(SrFctHeader)
+            .filter(
+                or_(
+                    SrFctHeader.fspemail == email,
+                    SrFctHeader.rsmemail == email,
+                    # SrFctHeader.ssaemail == email  # Removed for now - future enhancement
+                )
             )
+            .all()
         )
-
-        # Add keyid filter if provided
-        if keyid:
-            header_query = header_query.filter(SrFctHeader.keyid == keyid)
-
-        headers = header_query.all()
 
         if not headers:
             return {
@@ -58,15 +54,15 @@ class CRUDSrSync:
         first_header = headers[0]
         user_role = self._get_user_role(email, first_header)
 
-        # Get all appkeys from headers
-        appkeys = [header.appkey for header in headers]
+        # Get all keyids from headers
+        keyids = [header.keyid for header in headers]
 
-        # Get items for all headers
-        items = db.query(SrFctItems).filter(SrFctItems.appkey.in_(appkeys)).all()
+        # Get items for all headers using keyid relationship
+        items = db.query(SrFctItems).filter(SrFctItems.keyid.in_(keyids)).all()
 
-        # Get attachments for all headers
+        # Get attachments for all headers using keyid relationship
         attachments = (
-            db.query(SrFctAttachment).filter(SrFctAttachment.appkey.in_(appkeys)).all()
+            db.query(SrFctAttachment).filter(SrFctAttachment.keyid.in_(keyids)).all()
         )
 
         # Get visit data for customer info
@@ -85,7 +81,7 @@ class CRUDSrSync:
             visit = visit_map.get(header.keyid)
 
             # Get items for this header
-            header_items = [item for item in items if item.appkey == header.appkey]
+            header_items = [item for item in items if item.keyid == header.keyid]
 
             # Separate return and replace items based on fk_actiontype
             return_items = [
@@ -108,12 +104,10 @@ class CRUDSrSync:
                 fk_reasonreturn=header.fk_reasonreturn,
                 fk_modereturn=header.fk_modereturn,
                 fk_status=header.fk_status,
-                fk_srrtype=header.fk_srrtype,  # Changed from srr_type to match DB field
+                fk_srrtype=header.fk_srrtype,
                 code=header.code,
-                date_sent_approval=(
-                    header.date_sent_approval.isoformat()
-                    if header.date_sent_approval
-                    else None
+                created_at=(
+                    header.created_at.isoformat() if header.created_at else None
                 ),
                 # Map FctVisits fields correctly: kunnr->customer_code, name->customer_name, address->customer_address
                 customer_code=visit.kunnr if visit else "",
@@ -125,9 +119,11 @@ class CRUDSrSync:
                 ship_to=(
                     visit.kunnr if visit else ""
                 ),  # Same as customer_code from visits
+                updated_shiptocode=header.updated_shiptocode,
                 sdo_pao_remarks=header.sdo_pao_remarks,
                 ssa_remarks=header.ssa_remarks,
                 approver_remarks=header.approver_remarks,
+                remarks_return=header.remarks_return,
                 return_items=return_items,
                 replace_items=replace_items,
             )

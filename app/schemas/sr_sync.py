@@ -1,7 +1,7 @@
 # app/schemas/sr_sync.py
 from pydantic import BaseModel, Field
 from typing import List, Optional, Any
-from datetime import date
+from datetime import datetime
 from decimal import Decimal
 
 from app.models.sr_fct_items import SrFctItems
@@ -65,15 +65,17 @@ class SrSyncHeaderData(BaseModel):
     fk_status: Optional[int] = None
     fk_srrtype: Optional[int] = None
     code: str
-    date_sent_approval: Optional[str] = None  # ISO format string
+    created_at: Optional[datetime] = None
     customer_code: str
     customer_name: str
     customer_address: str
     ship_name: str
     ship_to: str
+    updated_shiptocode: str
     sdo_pao_remarks: Optional[str] = None
     ssa_remarks: Optional[str] = None
     approver_remarks: Optional[str] = None
+    remarks_return: str
     return_items: List[SrSyncItemData] = []
     replace_items: List[SrSyncItemData] = []
 

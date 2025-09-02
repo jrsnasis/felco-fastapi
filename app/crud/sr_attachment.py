@@ -14,16 +14,14 @@ class CRUDSrAttachment:
         """Get all attachments by email through sr_fct_header relationship"""
         return (
             db.query(self.model)
-            .join(SrFctHeader, self.model.appkey == SrFctHeader.appkey)
+            .join(SrFctHeader, self.model.keyid == SrFctHeader.keyid)
             .filter((SrFctHeader.fspemail == email) | (SrFctHeader.rsmemail == email))
             .all()
         )
 
-    def get_by_appkeys(
-        self, db: Session, *, appkeys: List[str]
-    ) -> List[SrFctAttachment]:
-        """Get all attachments by list of appkeys"""
-        return db.query(self.model).filter(self.model.appkey.in_(appkeys)).all()
+    def get_by_keyid(self, db: Session, *, keyids: List[str]) -> List[SrFctAttachment]:
+        """Get all attachments by list of keyids"""
+        return db.query(self.model).filter(self.model.keyid.in_(keyids)).all()
 
 
 sr_attachment_crud = CRUDSrAttachment(SrFctAttachment)

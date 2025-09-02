@@ -7,8 +7,8 @@ class SrFctAttachment(Base):
     __tablename__ = "sr_fct_attachment"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    appkey = Column(String(20), ForeignKey("sr_fct_header.appkey"), nullable=False)
-    keyid = Column(String(20))
+    appkey = Column(String(20))
+    keyid = Column(String(20), ForeignKey("sr_fct_header.keyid"), nullable=False)
     image = Column(String(255))
     image_tag = Column(String(50))
     is_active = Column(Boolean)

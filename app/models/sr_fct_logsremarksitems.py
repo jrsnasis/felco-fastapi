@@ -8,8 +8,8 @@ class SrFctLogsRemarksItems(Base):
     __tablename__ = "sr_fct_logsremarksitems"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    appkey = Column(String(50), ForeignKey("sr_fct_items.appkey"), nullable=False)
-    keyid = Column(String(50))
+    appkey = Column(String(50))
+    keyid = Column(String(50), ForeignKey("sr_fct_items.appkey"), nullable=False)
     fk_typeapprovalstatus = Column(Integer, ForeignKey("sr_dim_typeofapprovalstat.id"))
     remarks = Column(String(255))
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)

@@ -15,17 +15,17 @@ class CRUDSrLogsRemarksItems:
         """Get all items logs by email through sr_fct_items -> sr_fct_header relationship"""
         return (
             db.query(self.model)
-            .join(SrFctItems, self.model.appkey == SrFctItems.appkey)
-            .join(SrFctHeader, SrFctItems.appkey == SrFctHeader.appkey)
+            .join(SrFctItems, self.model.keyid == SrFctItems.keyid)
+            .join(SrFctHeader, SrFctItems.keyid == SrFctHeader.keyid)
             .filter((SrFctHeader.fspemail == email) | (SrFctHeader.rsmemail == email))
             .all()
         )
 
-    def get_by_appkeys(
-        self, db: Session, *, appkeys: List[str]
+    def get_by_keyids(
+        self, db: Session, *, keyids: List[str]
     ) -> List[SrFctLogsRemarksItems]:
-        """Get all items logs by list of appkeys"""
-        return db.query(self.model).filter(self.model.appkey.in_(appkeys)).all()
+        """Get all items logs by list of keyids"""
+        return db.query(self.model).filter(self.model.keyid.in_(keyids)).all()
 
 
 sr_logsremarksitems_crud = CRUDSrLogsRemarksItems(SrFctLogsRemarksItems)

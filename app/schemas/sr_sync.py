@@ -75,7 +75,7 @@ class SrSyncHeaderData(BaseModel):
     sdo_pao_remarks: Optional[str] = None
     ssa_remarks: Optional[str] = None
     approver_remarks: Optional[str] = None
-    remarks_return: str
+    remarks_return: Optional[str] = None
     return_items: List[SrSyncItemData] = []
     replace_items: List[SrSyncItemData] = []
 
